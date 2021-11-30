@@ -1,5 +1,6 @@
 import os
 import time
+import secrets
 import logging
 
 from flask import Flask
@@ -21,6 +22,8 @@ def create_app():
     # Configure app environment, defaults to development
     flask_env = os.getenv('FLASK_ENV', 'development')
     app.config.from_object(app_config.get(flask_env))
+    app.config.from_pyfile('secrets.py', silent=True)
+    app.secret_key = secrets.token_hex(16)
 
     # Setup logging
     os.makedirs(app.config['LOG_DIR'], exist_ok=True)

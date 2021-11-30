@@ -8,31 +8,6 @@ import openpyxl
 import markdown2
 
 
-# try:
-#     from secrets import EMAIL_ADDR, EMAIL_PWD
-# except ImportError:
-#     print('[ERROR] No email credentials specified, please consult documentation.')
-#     print('Aborting.')
-#     exit(-1)
-
-
-# class Recipient:
-
-#     def __init__(self):
-#         self.address = ''
-#         self.name = ''
-#         self.extras = {}
-    
-#     def __repr__(self):
-#         repr_text = f'<{self.address}>'
-#         if self.name:
-#             repr_text = f'{self.name} {repr_text}'
-#         return repr_text
-    
-#     def __str__(self):
-#         return self.__repr__()
-
-
 def get_recipients(filepath: str) -> list[dict]:
     file = Path(filepath)
     if file.suffix == '.xlsx': # Note all suffixes should be in lowercase by now
@@ -101,21 +76,21 @@ def generate_preview(template_body, recipients):
     return message_body
 
 
-def send_emails(recipients, template_body, is_plain_text=False):
+def batch_send_emails(credentials, recipients, template_body, is_plain_text=False):
     # 登录邮箱服务器
     print('[INFO] Authenticating...')
     mailserver = smtplib.SMTP('smtp.office365.com', 587)
     mailserver.ehlo()
     mailserver.starttls()
-    mailserver.login(EMAIL_ADDR, EMAIL_PWD)
+    mailserver.login(*credentials)
 
     # 批量发送邮件
     print('[INFO] Start batch sending emails.')
     total_length = len(recipients)
     for i, recipient in enumerate(recipients):
         message = MIMEMultipart()
-        message['From'] = f'Oxford China Forum <{EMAIL_ADDR}>'
-        message['To'] = recipient.address
+        message['From'] = f'Oxford China Forum <{credentials[0]}>'
+        message['To'] = recipient['address']
         message['Subject'] = 'Welcome to OCF!'
 
         # 用收件人信息替换模板占位符
@@ -123,15 +98,14 @@ def send_emails(recipients, template_body, is_plain_text=False):
         message.attach(MIMEText(message_body, 'plain' if is_plain_text else 'html', 'utf-8'))
 
         # TODO: handle attachments
-        # 在这里设置附件
         # att1 = MIMEText(open('123.pdf', 'rb').read(), 'base64', 'utf-8')
         # att1['Content-Type'] = 'application/octet-stream'
         # att1['Content-Disposition'] = 'attachment; filename='123.pdf''
         # message.attach(att1)
-        # 在这里结束设置附件
+        ...
 
         try:
-            mailserver.sendmail(EMAIL_ADDR, recipient.address, message.as_string())
+            mailserver.sendmail(credentials[0], recipient['address'], message.as_string())
             print(f'[INFO] ({i+1}/{total_length}) 成功发送 {recipient}')
         except smtplib.SMTPException:
             print(f'[WARNING] ({i+1}/{total_length}) 发送失败 {recipient}')
@@ -156,4 +130,4 @@ if __name__ == '__main__':
     recipients = get_recipients(recipients_path)
     message_body = get_message_body(body_path)
 
-    send_emails(recipients, message_body)
+    batch_send_emails(recipients, message_body)

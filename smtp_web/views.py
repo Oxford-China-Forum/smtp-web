@@ -5,7 +5,7 @@ import time
 from flask import current_app as app
 from flask import request, session, render_template, jsonify, redirect, url_for
 
-from .smtp_utils import *
+from .smtp_utils import get_recipients, get_message_body, generate_preview, batch_send_emails
 
 
 @app.route('/', methods=['GET'])
@@ -30,27 +30,30 @@ def upload_files():
     body_file.save(os.path.join(app.config['UPLOAD_DIR'], body_filename))
     recipients_file.save(os.path.join(app.config['UPLOAD_DIR'], recipients_filename))
 
-    # body = get_message_body(body_path)
-    # recipients = get_recipients(recipients_path)
-    # session['body'] = body
-    # session['recipients'] = recipients
-    # session['ready'] = True
-
     return jsonify({'message': 'Success', 'data': {'bodyName': body_filename, 'recipientsName': recipients_filename}})
 
 
 @app.route('/preview', methods=['GET'])
-def get_email_preview():
-    # print(session.get('ready'))
-    # assert session.get('ready')
-    # print(session['body'])
-
+def email_preview():
     body_filename = request.args.get('bodyName')
     recipients_filename = request.args.get('recipientsName')
     body = get_message_body(os.path.join(app.config['UPLOAD_DIR'], body_filename))
     recipients = get_recipients(os.path.join(app.config['UPLOAD_DIR'], recipients_filename))
 
     return generate_preview(body, recipients)
+
+
+@app.route('/send', methods=['POST'])
+def send_emails():
+    body_filename = request.json.get('bodyName')
+    recipients_filename = request.json.get('recipientsName')
+    body = get_message_body(os.path.join(app.config['UPLOAD_DIR'], body_filename))
+    recipients = get_recipients(os.path.join(app.config['UPLOAD_DIR'], recipients_filename))
+
+    credentials = (app.config['EMAIL_ADDR'], app.config['EMAIL_PWD'])
+    print(body, recipients)
+    batch_send_emails(credentials, recipients, body)
+    return jsonify({'message': 'Success'})
 
 
 def get_file_extension(filename):

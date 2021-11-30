@@ -83,7 +83,7 @@ def _read_excel_data(filepath):
 def get_message_body(filepath):
     with open(filepath, encoding='UTF-8') as f:
         raw_markdown = f.read()
-    with open('email_template.html', encoding='UTF-8') as f:
+    with open('smtp_web/email_template.html', encoding='UTF-8') as f:
         template_html = f.read()
     message_body = md2html(raw_markdown)
     message_body = template_html.replace('{{message_body}}', message_body)

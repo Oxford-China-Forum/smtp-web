@@ -24,10 +24,12 @@ def create_app():
 
     # Setup logging
     os.makedirs(app.config['LOG_DIR'], exist_ok=True)
+    os.makedirs(app.config['UPLOAD_DIR'], exist_ok=True)
     filename = time.strftime('%Y%m%d-%H%M%S.log')
     filepath = os.path.join(app.config['LOG_DIR'], filename)
     if flask_env == 'development':
-        logging.basicConfig(filename=filepath, level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+        # logging.basicConfig(filename=filepath, level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+        pass
     elif flask_env == 'production':
         logging.basicConfig(filename=filepath, level=logging.INFO, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 

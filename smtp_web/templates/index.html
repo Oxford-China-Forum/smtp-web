@@ -20,9 +20,40 @@
       class="dropzone"
       id="my-awesome-dropzone"></form> -->
 
-  <div class="container-fluid p-0" id="page-container">
+  <div class="d-flex flex-row container-fluid p-0" id="page-container">
 
-    <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px;">
+    <div class="d-flex flex-column p-3 text-white bg-dark" id="page-left-container">
+      <form id="preview-form" action="#" method="POST" enctype="multipart/form-data">
+        <div class="row">
+          <div class="col step-number-container">
+            <p class="step-number">1</p>
+          </div>
+          <div class="col">
+            <p>上传邮件模板 Markdown 文件</p>
+            <input type="file" id="bodyFile" name="body">
+            <!-- <form action="/file-upload" class="dropzone" id="body-dropzone"></form>
+            <form action="/file-upload" class="dropzone" id="an-other-form-element"></form> -->
+          </div>
+        </div>
+        <div class="row">
+          <div class="col step-number-container">
+            <p class="step-number">2</p>
+          </div>
+          <div class="col">
+            <p>上传收件人 Excel 列表</p>
+            <input type="file" id="recipientsFile" name="recipients">
+          </div>
+        </div>
+        <!-- <input type="submit"> -->
+        <button type="submit" value="查看预览" class="btn btn-outline-light" id="submit">查看预览</button>
+      </form>
+    </div>
+
+    <div class="d-flex flex-column flex-shrink-0 p-3">
+      HI
+    </div>
+    
+    <!-- <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px;">
       <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
         <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
         <span class="fs-4">Sidebar</span>
@@ -61,7 +92,7 @@
         </li>
       </ul>
       <hr>
-    </div>
+    </div> -->
 
   </div>
 {% endblock %}

@@ -6,3 +6,19 @@ html, body{
     height: 100vh;
     /* min-height: 100vh; */
 }
+
+#page-left-container {
+    /* background: lightgray; */
+}
+
+.step-number-container {
+    width: 100px;
+    max-width: 100px;
+}
+
+.step-number {
+    margin-top: -48px;
+    font-size: 96pt;
+    font-weight: bold;
+    text-align: right;
+}

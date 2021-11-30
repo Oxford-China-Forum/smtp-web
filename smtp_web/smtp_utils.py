@@ -16,33 +16,24 @@ import markdown2
 #     exit(-1)
 
 
-class Recipient:
+# class Recipient:
 
-    def __init__(self):
-        self.address = ''
-        self.name = ''
-        self.extras = {}
+#     def __init__(self):
+#         self.address = ''
+#         self.name = ''
+#         self.extras = {}
     
-    def __repr__(self):
-        repr_text = f'<{self.address}>'
-        if self.name:
-            repr_text = f'{self.name} {repr_text}'
-        return repr_text
+#     def __repr__(self):
+#         repr_text = f'<{self.address}>'
+#         if self.name:
+#             repr_text = f'{self.name} {repr_text}'
+#         return repr_text
     
-    def __str__(self):
-        return self.__repr__()
-    
-    def format_message(self, message_body):
-        # TODO: use a better method
-        message_body = message_body.replace('{{name}}', self.name)
-        message_body = message_body.replace('{{ name }}', self.name)
-        for key, val in self.extras:
-            message_body = message_body.replace('{{' + key + '}}', val)
-            message_body = message_body.replace('{{ ' + key + ' }}', val)
-        return message_body
+#     def __str__(self):
+#         return self.__repr__()
 
 
-def get_recipients(filepath: str) -> list[Recipient]:
+def get_recipients(filepath: str) -> list[dict]:
     file = Path(filepath)
     if file.suffix == '.xlsx': # Note all suffixes should be in lowercase by now
         return _read_excel_data(filepath)
@@ -68,13 +59,11 @@ def _read_excel_data(filepath):
         if row[0].value.strip() == '': # TODO: add regex address check
             continue
     
-        recipient = Recipient()
-        recipient.address = row[0].value
-        recipient.name = row[1].value
-
-        for i, key in extras_keys:
-            recipient.extras[key] = row[i].value
-        
+        recipient = {
+            'address': row[0].value,
+            'name': row[1].value,
+            'extras': {key: row[i].value for i, key in extras_keys}
+        }
         recipients.append(recipient)
 
     return recipients
@@ -100,8 +89,16 @@ def minimize(message_body):
     return message_body
 
 
+def format_message(message_body, recipient):
+    message_body = re.sub(r'{{ *name *}}', recipient['name'], message_body)
+    for key, val in recipient['extras']:
+        message_body = re.sub(r'{{ *' + key + r' *}}', val, message_body)
+    return message_body
+
+
 def generate_preview(template_body, recipients):
-    message_body = recipients[0].format_message(template_body)
+    message_body = format_message(template_body, recipients[0])
+    return message_body
 
 
 def send_emails(recipients, template_body, is_plain_text=False):
@@ -122,7 +119,7 @@ def send_emails(recipients, template_body, is_plain_text=False):
         message['Subject'] = 'Welcome to OCF!'
 
         # 用收件人信息替换模板占位符
-        message_body = recipient.format_message(template_body)
+        message_body = format_message(template_body, recipient)
         message.attach(MIMEText(message_body, 'plain' if is_plain_text else 'html', 'utf-8'))
 
         # TODO: handle attachments

@@ -30,16 +30,16 @@ def upload_files():
     body = get_message_body(body_path)
     recipients = get_recipients(recipients_path)
     session['body'] = body
-    session['recipients'] = vars(recipients[0])
-    print(session['recipients'])
+    session['recipients'] = recipients
     session['ready'] = True
     return 'good'
 
 
 @app.route('/preview', methods=['GET'])
 def get_email_preview():
-    print(session.get('ready'))
-    assert session.get('ready')
+    # print(session.get('ready'))
+    # assert session.get('ready')
+    print(session)
     return generate_preview(session['body'], session['recipients'])
 
 

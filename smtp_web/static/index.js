@@ -12,10 +12,11 @@ document.getElementById('preview-form').addEventListener('submit', e => {
         method: 'POST',
         body: formData,
     })
-    .then(data => {
-        console.log(data);
+    .then(data => data.json())
+    .then(json => {
+        console.log(json);
         const iframe = document.createElement('iframe');
-        iframe.setAttribute('src', '/preview');
+        iframe.setAttribute('src', `/preview?bodyName=${json.data.bodyName}&recipientsName=${json.data.recipientsName}`);
         iframe.style.width = '640px';
         iframe.style.height = '800px';
         document.getElementById('page-right-container').appendChild(iframe);

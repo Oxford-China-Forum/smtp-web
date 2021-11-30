@@ -9,6 +9,11 @@ html, body{
 
 #page-left-container {
     /* background: lightgray; */
+    padding: 50px 30px;
+}
+
+#preview-form {
+    margin-top: 150px;
 }
 
 .step-number-container {

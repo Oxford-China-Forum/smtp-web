@@ -37,7 +37,7 @@ def _read_excel_data(filepath):
         recipient = {
             'address': row[0].value,
             'name': row[1].value,
-            'extras': {key: row[i].value for i, key in extras_keys}
+            'extras': {key: row[i].value for i, key in extras_keys.items()}
         }
         recipients.append(recipient)
 
@@ -67,8 +67,8 @@ def minimize(message_body):
 
 def format_message(message_body, recipient):
     message_body = re.sub(r'{{ *name *}}', recipient['name'], message_body)
-    for key, val in recipient['extras']:
-        message_body = re.sub(r'{{ *' + key + r' *}}', val, message_body)
+    for key, val in recipient['extras'].items():
+        message_body = re.sub(r'{{ *' + key + r' *}}', str(val), message_body)
     return message_body
 
 

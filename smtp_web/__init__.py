@@ -47,9 +47,9 @@ def create_app():
     # app.register_blueprint(api)
 
     # Initialize database
-    db.init_app(app)
-    with app.app_context():
-        db.create_all()
+    # db.init_app(app)
+    # with app.app_context():
+    #     db.create_all()
 
     # @app.before_first_request
     # def initialize_db_entries():

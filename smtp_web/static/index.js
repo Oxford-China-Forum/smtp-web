@@ -4,7 +4,6 @@ let bodyName, recipientsName;
 
 document.getElementById('preview-form').addEventListener('submit', e => {
     e.preventDefault();
-    console.log('submitted')
 
     // Submit form and insert email preview
     const formData = new FormData(e.target);
@@ -19,7 +18,6 @@ document.getElementById('preview-form').addEventListener('submit', e => {
     .then(json => {
         bodyName = json.data.bodyName;
         recipientsName = json.data.recipientsName;
-        console.log(bodyName, recipientsName);
 
         const parentContainer = document.getElementById('page-right-container');
         const iframe = document.createElement('iframe');
@@ -35,6 +33,8 @@ document.getElementById('preview-form').addEventListener('submit', e => {
 });
 
 document.getElementById('confirm-send-btn').addEventListener('click', e => {
+    document.getElementById('status-info').innerHTML = '正在发送……';
+    e.target.setAttribute('disabled', '');
     fetch('/send', {
         method: 'POST',
         headers: {
@@ -44,5 +44,14 @@ document.getElementById('confirm-send-btn').addEventListener('click', e => {
         body: JSON.stringify({bodyName: bodyName, recipientsName: recipientsName}),
     })
     .then(resp => resp.json())
-    .then(json => console.log(json))
+    .then(json => {
+        console.log(json);
+        document.getElementById('confirm-send-btn').removeAttribute('disabled');
+        if (json.message == 'Success') {
+            document.getElementById('confirm-send-btn').setAttribute('hidden', '');
+            document.getElementById('status-info').innerHTML = '发送成功';
+        } else {
+            document.getElementById('status-info').innerHTML = '发送失败';
+        }
+    })
 });

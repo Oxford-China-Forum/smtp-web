@@ -50,7 +50,7 @@ def get_message_body(filepath):
     with open('smtp_web/email_template.html', encoding='UTF-8') as f:
         template_html = f.read()
     message_body = md2html(raw_markdown)
-    message_body = template_html.replace('{{message_body}}', message_body)
+    message_body = re.sub(r'{{message_body}}', message_body, template_html)
     message_body = minimize(message_body)
     return message_body
 
@@ -61,6 +61,7 @@ def md2html(message_body):
 
 
 def minimize(message_body):
+    # TODO: implement
     return message_body
 
 
@@ -76,16 +77,22 @@ def generate_preview(template_body, recipients):
     return message_body
 
 
-def batch_send_emails(credentials, recipients, template_body, is_plain_text=False):
+def batch_send_emails(credentials, recipients, template_body, logger=None, is_plain_text=False):
     # 登录邮箱服务器
-    print('[INFO] Authenticating...')
+    if logger is None:
+        print('[INFO] Authenticating...')
+    else:
+        logger.info('Authenticating...')
     mailserver = smtplib.SMTP('smtp.office365.com', 587)
     mailserver.ehlo()
     mailserver.starttls()
     mailserver.login(*credentials)
 
     # 批量发送邮件
-    print('[INFO] Start batch sending emails.')
+    if logger is None:
+        print('[INFO] Start batch sending emails.')
+    else:
+        logger.info('Start batch sending emails.')
     total_length = len(recipients)
     for i, recipient in enumerate(recipients):
         message = MIMEMultipart()
@@ -106,9 +113,16 @@ def batch_send_emails(credentials, recipients, template_body, is_plain_text=Fals
 
         try:
             mailserver.sendmail(credentials[0], recipient['address'], message.as_string())
-            print(f'[INFO] ({i+1}/{total_length}) 成功发送 {recipient}')
+            if logger is None:
+                print(f'[INFO] ({i+1}/{total_length}) 成功发送 {recipient["address"]}')
+            else:
+                logger.info(f'({i+1}/{total_length}) 成功发送 {recipient["address"]}')
         except smtplib.SMTPException:
-            print(f'[WARNING] ({i+1}/{total_length}) 发送失败 {recipient}')
+            if logger is None:
+                print(f'[WARNING] ({i+1}/{total_length}) 发送失败 {recipient["address"]}')
+            else:
+                logger.warning(f'({i+1}/{total_length}) 发送失败 {recipient["address"]}')
+            
 
     mailserver.quit()
 

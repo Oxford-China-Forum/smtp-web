@@ -51,8 +51,7 @@ def send_emails():
     recipients = get_recipients(os.path.join(app.config['UPLOAD_DIR'], recipients_filename))
 
     credentials = (app.config['EMAIL_ADDR'], app.config['EMAIL_PWD'])
-    print(body, recipients)
-    batch_send_emails(credentials, recipients, body)
+    batch_send_emails(credentials, recipients, body, logger=app.logger)
     return jsonify({'message': 'Success'})
 
 

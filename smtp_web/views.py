@@ -66,7 +66,7 @@ def send_emails():
 
     credentials = (app.config['EMAIL_ADDR'], app.config['EMAIL_PWD'])
     batch_send_emails(credentials, subject, recipients, body, logger=app.logger)
-    return jsonify({'message': 'Success'})
+    return json_resp()
 
 
 def get_file_extension(filename):

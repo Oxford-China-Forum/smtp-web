@@ -10,6 +10,11 @@ html, body{
 #page-left-container {
     /* background: lightgray; */
     padding: 50px 30px;
+    width: calc(100vw - 680px);
+}
+
+#page-right-container {
+    width: 680px;
 }
 
 #preview-form {

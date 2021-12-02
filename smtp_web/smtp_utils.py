@@ -77,7 +77,7 @@ def generate_preview(template_body, recipients):
     return message_body
 
 
-def batch_send_emails(credentials, recipients, template_body, logger=None, is_plain_text=False):
+def batch_send_emails(credentials, subject, recipients, template_body, logger=None, is_plain_text=False):
     # 登录邮箱服务器
     if logger is None:
         print('[INFO] Authenticating...')
@@ -98,7 +98,7 @@ def batch_send_emails(credentials, recipients, template_body, logger=None, is_pl
         message = MIMEMultipart()
         message['From'] = f'Oxford China Forum <{credentials[0]}>'
         message['To'] = recipient['address']
-        message['Subject'] = 'Welcome to OCF!'
+        message['Subject'] = subject
 
         # 用收件人信息替换模板占位符
         message_body = format_message(template_body, recipient)

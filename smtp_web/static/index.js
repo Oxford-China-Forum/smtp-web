@@ -1,6 +1,14 @@
 // let myDropzone = new Dropzone("div#body-dropzone", { url: "/file/post"});
 
 let bodyName, recipientsName;
+const statusText = document.getElementById('status-info');
+
+function updateStatus(message, statusName) {
+    statusName = statusName || 'light';
+    statusText.className = '';
+    statusText.classList.add('text-' + statusName);
+    statusText.innerHTML = message;
+}
 
 document.getElementById('preview-form').addEventListener('submit', e => {
     e.preventDefault();
@@ -16,6 +24,12 @@ document.getElementById('preview-form').addEventListener('submit', e => {
     })
     .then(data => data.json())
     .then(json => {
+        if (json.code !== 0) {
+            updateStatus('缺少文件或空白标题', 'danger');
+            return;
+        }
+        statusText.innerHTML = '';
+
         bodyName = json.data.bodyName;
         recipientsName = json.data.recipientsName;
 
@@ -33,25 +47,27 @@ document.getElementById('preview-form').addEventListener('submit', e => {
 });
 
 document.getElementById('confirm-send-btn').addEventListener('click', e => {
-    document.getElementById('status-info').innerHTML = '正在发送……';
+    if (!confirm('是否确定开始批量发送邮件？这一操作无法中断。')) return;
+    updateStatus('正在发送……');
     e.target.setAttribute('disabled', '');
+    const subject = document.getElementById('subjectInput').value;
     fetch('/send', {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({bodyName: bodyName, recipientsName: recipientsName}),
+        body: JSON.stringify({subject: subject, bodyName: bodyName, recipientsName: recipientsName}),
     })
     .then(resp => resp.json())
     .then(json => {
         console.log(json);
         document.getElementById('confirm-send-btn').removeAttribute('disabled');
-        if (json.message == 'Success') {
+        if (json.code === 0) {
             document.getElementById('confirm-send-btn').setAttribute('hidden', '');
-            document.getElementById('status-info').innerHTML = '发送成功';
+            updateStatus('发送成功', 'success');
         } else {
-            document.getElementById('status-info').innerHTML = '发送失败';
+            updateStatus('发送失败', 'danger');
         }
     })
 });

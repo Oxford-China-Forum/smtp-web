@@ -22,10 +22,8 @@
             <p class="step-number">1</p>
           </div>
           <div class="col">
-            <p>上传邮件模板 Markdown 文件</p>
-            <input type="file" id="bodyFile" name="body">
-            <!-- <form action="/file-upload" class="dropzone" id="body-dropzone"></form>
-            <form action="/file-upload" class="dropzone" id="an-other-form-element"></form> -->
+            <p>邮件标题</p>
+            <input type="text" class="form-control" id="subjectInput" name="subject" value="Welcome to OCF!">
           </div>
         </div>
         <div class="row">
@@ -33,14 +31,31 @@
             <p class="step-number">2</p>
           </div>
           <div class="col">
+            <p>上传邮件模板 Markdown 文件</p>
+            <input type="file" class="form-control" id="bodyFile" name="body">
+            <!-- <form action="/file-upload" class="dropzone" id="body-dropzone"></form>
+            <form action="/file-upload" class="dropzone" id="an-other-form-element"></form> -->
+          </div>
+        </div>
+        <div class="row">
+          <div class="col step-number-container">
+            <p class="step-number">3</p>
+          </div>
+          <div class="col">
             <p>上传收件人 Excel 列表</p>
-            <input type="file" id="recipientsFile" name="recipients">
+            <input type="file" class="form-control" id="recipientsFile" name="recipients">
           </div>
         </div>
         <!-- <input type="submit"> -->
-        <button type="submit" value="查看预览" class="btn btn-outline-light" id="submit-btn">查看预览</button>
-        <button type="button" value="确认发送" class="btn btn-danger" id="confirm-send-btn" hidden>确认发送</button>
-        <p id="status-info"></p>
+        <div class="row">
+          <div class="col">
+            <button type="submit" value="查看预览" class="btn btn-lg btn-outline-light" id="submit-btn" style="margin-right: 1em;">查看预览</button>
+            <button type="button" value="确认发送" class="btn btn-lg btn-danger" id="confirm-send-btn" hidden>确认发送</button>
+          </div>
+        </div>
+        <div class="row mt-4 text-bold">
+          <p id="status-info"></p>
+        </div>
       </form>
     </div>
 

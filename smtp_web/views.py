@@ -4,7 +4,9 @@ import time
 
 from flask import current_app as app
 from flask import request, session, render_template, jsonify, redirect, url_for
+from flask_socketio import join_room, leave_room
 
+from . import socketio
 from .smtp_utils import get_recipients, get_message_body, generate_preview, batch_send_emails
 
 
@@ -39,6 +41,7 @@ def upload_files():
 def email_preview():
     body_filename = request.args.get('bodyName')
     recipients_filename = request.args.get('recipientsName')
+    # TODO: Catch error when generating
     body = get_message_body(os.path.join(app.config['UPLOAD_DIR'], body_filename))
     recipients = get_recipients(os.path.join(app.config['UPLOAD_DIR'], recipients_filename))
 
@@ -69,6 +72,36 @@ def send_emails():
     return json_resp()
 
 
+@socketio.on('send')
+def initialize_send(data):
+    room = request.sid
+    join_room(room)
+
+    subject = data.get('subject')
+    body_filename = data.get('bodyName')
+    recipients_filename = data.get('recipientsName')
+
+    error_flag = False
+    if subject is None or subject == '':
+        error_flag = True
+    elif body_filename is None or body_filename == '' or not os.path.isfile(os.path.join(app.config['UPLOAD_DIR'], body_filename)):
+        error_flag = True
+    elif recipients_filename is None or recipients_filename == '' or not os.path.isfile(os.path.join(app.config['UPLOAD_DIR'], recipients_filename)):
+        error_flag = True
+
+    if error_flag:
+        socketio.emit('message', {'message': '参数有误：缺失文件名或邮件主题为空', 'type': 'danger'}, to=room)
+    else:
+        body = get_message_body(os.path.join(app.config['UPLOAD_DIR'], body_filename))
+        recipients = get_recipients(os.path.join(app.config['UPLOAD_DIR'], recipients_filename))
+
+        credentials = (app.config['EMAIL_ADDR'], app.config['EMAIL_PWD'])
+        batch_send_emails(credentials, subject, recipients, body, room=room, logger=app.logger)
+    
+    socketio.emit('message', {'message': '发送完成'}, to=room)
+    socketio.emit('end', to=room)
+
+
 def get_file_extension(filename):
     if '.' not in filename:
         return ''
@@ -82,4 +115,3 @@ def json_resp(data=None, code=0, message='Success'):
     if code != 0 and message == 'Success':
         resp_data['message'] = 'Error'
     return jsonify(resp_data)
-

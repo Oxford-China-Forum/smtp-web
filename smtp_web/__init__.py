@@ -4,6 +4,7 @@ import secrets
 import logging
 
 from flask import Flask
+from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_caching import Cache
 from flask_cors import CORS
@@ -13,6 +14,7 @@ from config import app_config
 
 # Initialize outside to be importable
 db = SQLAlchemy()
+socketio = SocketIO()
 cache = Cache(config={'CACHE_TYPE': 'simple'})
 
 def create_app():
@@ -37,6 +39,7 @@ def create_app():
         logging.basicConfig(filename=filepath, level=logging.INFO, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
     # Initialize plugin instances
+    socketio.init_app(app)
     cache.init_app(app)
     CORS(app)
 

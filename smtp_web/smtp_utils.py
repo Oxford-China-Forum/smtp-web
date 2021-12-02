@@ -7,6 +7,8 @@ from pathlib import Path
 import openpyxl
 import markdown2
 
+from . import socketio
+
 
 def get_recipients(filepath: str) -> list[dict]:
     file = Path(filepath)
@@ -77,12 +79,15 @@ def generate_preview(template_body, recipients):
     return message_body
 
 
-def batch_send_emails(credentials, subject, recipients, template_body, logger=None, is_plain_text=False):
+def batch_send_emails(credentials, subject, recipients, template_body, room=None, logger=None, is_plain_text=False):
     # 登录邮箱服务器
     if logger is None:
         print('[INFO] Authenticating...')
     else:
         logger.info('Authenticating...')
+    if room is not None:
+        socketio.emit('message', {'message': '邮箱登录中……'}, to=room)
+
     mailserver = smtplib.SMTP('smtp.office365.com', 587)
     mailserver.ehlo()
     mailserver.starttls()
@@ -93,6 +98,8 @@ def batch_send_emails(credentials, subject, recipients, template_body, logger=No
         print('[INFO] Start batch sending emails.')
     else:
         logger.info('Start batch sending emails.')
+    if room is not None:
+        socketio.emit('message', {'message': '开始发送……'}, to=room)
     total_length = len(recipients)
     for i, recipient in enumerate(recipients):
         message = MIMEMultipart()
@@ -117,12 +124,15 @@ def batch_send_emails(credentials, subject, recipients, template_body, logger=No
                 print(f'[INFO] ({i+1}/{total_length}) 成功发送 {recipient["address"]}')
             else:
                 logger.info(f'({i+1}/{total_length}) 成功发送 {recipient["address"]}')
+            if room is not None:
+                socketio.emit('message', {'message': f'({i+1}/{total_length}) 成功发送 {recipient["address"]}', 'type': 'success'}, to=room)
         except smtplib.SMTPException:
             if logger is None:
                 print(f'[WARNING] ({i+1}/{total_length}) 发送失败 {recipient["address"]}')
             else:
                 logger.warning(f'({i+1}/{total_length}) 发送失败 {recipient["address"]}')
-            
+            if room is not None:
+                socketio.emit('message', {'message': f'({i+1}/{total_length}) 发送失败 {recipient["address"]}', 'type': 'danger'}, to=room)
 
     mailserver.quit()
 

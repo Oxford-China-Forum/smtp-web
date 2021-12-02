@@ -3,6 +3,7 @@
 let bodyName, recipientsName;
 let readyToSend = false;
 const statusText = document.getElementById('status-info');
+const socket = io();
 
 function updateStatus(message, statusName) {
     statusName = statusName || 'light';
@@ -36,7 +37,7 @@ document.getElementById('preview-form').addEventListener('submit', e => {
             updateStatus('缺少文件或空白标题', 'danger');
             return;
         }
-        statusText.innerHTML = '';
+        updateStatus('');
         readyToSend = true;
 
         bodyName = json.data.bodyName;
@@ -57,31 +58,43 @@ document.getElementById('preview-form').addEventListener('submit', e => {
 
 document.getElementById('confirm-send-btn').addEventListener('click', e => {
     if (!confirm('是否确定开始批量发送邮件？这一操作无法中断。')) return;
-    updateStatus('正在发送……');
+    updateStatus('开始发送……');
     document.querySelectorAll('#preview-form button').forEach(el => el.setAttribute('disabled', ''));
     const subject = document.getElementById('subjectInput').value;
-    fetch('/send', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({subject: subject, bodyName: bodyName, recipientsName: recipientsName}),
-    })
-    .then(resp => resp.json())
-    .then(json => {
-        console.log(json);
-        document.querySelectorAll('#preview-form button').forEach(el => el.removeAttribute('disabled'));
-        if (json.code === 0) {
-            document.getElementById('confirm-send-btn').setAttribute('hidden', '');
-            updateStatus('发送成功', 'success');
-        } else {
-            updateStatus('发送失败', 'danger');
-        }
-    })
+    const data = {subject: subject, bodyName: bodyName, recipientsName: recipientsName};
+
+    // Use solely SocketIO
+    socket.emit('send', data);
+    // fetch('/send', {
+    //     method: 'POST',
+    //     headers: {
+    //         'Accept': 'application/json',
+    //         'Content-Type': 'application/json'
+    //     },
+    //     body: JSON.stringify(data),
+    // })
+    // .then(resp => resp.json())
+    // .then(json => {
+    //     document.querySelectorAll('#preview-form button').forEach(el => el.removeAttribute('disabled'));
+    //     if (json.code === 0) {
+    //         document.getElementById('confirm-send-btn').setAttribute('hidden', '');
+    //         // updateStatus('发送成功', 'success');
+    //     } else {
+    //         updateStatus('发送失败', 'danger');
+    //     }
+    // });
 });
 
 document.querySelectorAll('#preview-form input').forEach(el => {
     el.addEventListener('change', inputChanged);
     el.addEventListener('input', inputChanged);
+});
+
+socket.on('message', (data) => {
+    updateStatus(data.message, data.type);
+});
+
+socket.on('end', () => {
+    document.querySelectorAll('#preview-form button').forEach(el => el.removeAttribute('disabled'));
+    document.getElementById('confirm-send-btn').setAttribute('hidden', '');
 });

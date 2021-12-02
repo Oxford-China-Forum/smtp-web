@@ -39,7 +39,7 @@ def create_app():
         logging.basicConfig(filename=filepath, level=logging.INFO, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
     # Initialize plugin instances
-    socketio.init_app(app)
+    socketio.init_app(app, cors_allowed_origins=app.config['ALLOWED_ORIGINS'])
     cache.init_app(app)
     CORS(app)
 

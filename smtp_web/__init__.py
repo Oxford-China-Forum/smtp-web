@@ -46,47 +46,10 @@ def create_app():
     # Import views and APIs
     with app.app_context():
         import smtp_web.views
-    #     from munscore.apis import api
-    # app.register_blueprint(api)
 
     # Initialize database
     # db.init_app(app)
     # with app.app_context():
     #     db.create_all()
-
-    # @app.before_first_request
-    # def initialize_db_entries():
-    #     '''
-    #     Initialize database entries for default settings.
-    #     Note we assume each entity only has one score.
-    #     '''
-    #     from munscore.models import Entity, Score, History
-    #     from munscore.site_config import VENUES, PARTIES, SCORE_NAME, DEFAULT_SCORE
-
-    #     # Initialize venue (and score) entries if they don't exist
-    #     for venue_name in VENUES:
-    #         venue = Entity.query.filter_by(name=venue_name, is_venue=True).first()
-    #         if venue is None:
-    #             venue = Entity(name=venue_name, is_venue=True)
-    #             db.session.add(venue)
-    #         score = Score.query.filter_by(name=SCORE_NAME['venue'], entity=venue).first()
-    #         if score is None:
-    #             score = Score(name=SCORE_NAME['venue'], value=DEFAULT_SCORE['venue'], entity=venue)
-    #             db.session.add(score)
-    #             History.record(score, is_automatic=True)
-
-    #     # Initialize party (and score) entries if they don't exist
-    #     for party_name in PARTIES:
-    #         party = Entity.query.filter_by(name=party_name, is_party=True).first()
-    #         if party is None:
-    #             party = Entity(name=party_name, is_party=True)
-    #             db.session.add(party)
-    #         score = Score.query.filter_by(name=SCORE_NAME['party'], entity=party).first()
-    #         if score is None:
-    #             score = Score(name=SCORE_NAME['party'], value=DEFAULT_SCORE['party'], entity=party)
-    #             db.session.add(score)
-    #             History.record(score, is_automatic=True)
-
-    #     db.session.commit()
 
     return app

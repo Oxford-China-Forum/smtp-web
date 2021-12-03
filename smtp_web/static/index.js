@@ -34,7 +34,7 @@ document.getElementById('preview-form').addEventListener('submit', e => {
     .then(data => data.json())
     .then(json => {
         if (json.code !== 0) {
-            updateStatus('缺少文件或空白标题', 'danger');
+            updateStatus(json.message, 'danger');
             return;
         }
         updateStatus('');
@@ -63,26 +63,8 @@ document.getElementById('confirm-send-btn').addEventListener('click', e => {
     const subject = document.getElementById('subjectInput').value;
     const data = {subject: subject, bodyName: bodyName, recipientsName: recipientsName};
 
-    // Use solely SocketIO
+    // Use SocketIO instead of fetch to communicate
     socket.emit('send', data);
-    // fetch('/send', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Accept': 'application/json',
-    //         'Content-Type': 'application/json'
-    //     },
-    //     body: JSON.stringify(data),
-    // })
-    // .then(resp => resp.json())
-    // .then(json => {
-    //     document.querySelectorAll('#preview-form button').forEach(el => el.removeAttribute('disabled'));
-    //     if (json.code === 0) {
-    //         document.getElementById('confirm-send-btn').setAttribute('hidden', '');
-    //         // updateStatus('发送成功', 'success');
-    //     } else {
-    //         updateStatus('发送失败', 'danger');
-    //     }
-    // });
 });
 
 document.querySelectorAll('#preview-form input').forEach(el => {

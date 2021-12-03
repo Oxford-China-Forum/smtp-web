@@ -120,38 +120,20 @@ def batch_send_emails(credentials, subject, recipients, template_body, room=None
 
         try:
             mailserver.sendmail(credentials[0], recipient['address'], message.as_string())
+            message = f'({i+1}/{total_length}) 成功发送 {recipient["address"]}'
             if logger is None:
-                print(f'[INFO] ({i+1}/{total_length}) 成功发送 {recipient["address"]}')
+                print(f'[INFO] {message}')
             else:
-                logger.info(f'({i+1}/{total_length}) 成功发送 {recipient["address"]}')
+                logger.info(message)
             if room is not None:
-                socketio.emit('message', {'message': f'({i+1}/{total_length}) 成功发送 {recipient["address"]}', 'type': 'success'}, to=room)
+                socketio.emit('message', {'message': message, 'type': 'success'}, to=room)
         except smtplib.SMTPException:
+            message = f'({i+1}/{total_length}) 发送失败 {recipient["address"]}'
             if logger is None:
-                print(f'[WARNING] ({i+1}/{total_length}) 发送失败 {recipient["address"]}')
+                print(f'[WARNING] {message}')
             else:
-                logger.warning(f'({i+1}/{total_length}) 发送失败 {recipient["address"]}')
+                logger.warning(message)
             if room is not None:
-                socketio.emit('message', {'message': f'({i+1}/{total_length}) 发送失败 {recipient["address"]}', 'type': 'danger'}, to=room)
+                socketio.emit('message', {'message': message, 'type': 'danger'}, to=room)
 
     mailserver.quit()
-
-
-if __name__ == '__main__':
-    print('欢迎使用 OCF 群发邮件脚本。\n')
-    while True:
-        recipients_path = input('请输入收件人列表文件路径（可以直接拖拽文件），留空则使用 "recipients.xlsx"：') or 'recipients.xlsx'
-        if Path(recipients_path).is_file():
-            break
-        print('[ERROR] 文件路径不存在或错误，请重试')
-    while True:
-        body_path = input('请输入邮件内容文件路径（可以直接拖拽文件），留空则使用 "body.md"：') or 'body.md'
-        if Path(body_path).is_file():
-            break
-        print('[ERROR] 文件路径不存在或错误，请重试')
-    print()
-
-    recipients = get_recipients(recipients_path)
-    message_body = get_message_body(body_path)
-
-    batch_send_emails(recipients, message_body)

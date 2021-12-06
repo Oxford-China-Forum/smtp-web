@@ -1,6 +1,6 @@
 // let myDropzone = new Dropzone("div#body-dropzone", { url: "/file/post"});
 
-let bodyName, recipientsName;
+let bodyName, recipientsName, attachments;
 let readyToSend = false;
 const statusText = document.getElementById('status-info');
 const socket = io();
@@ -12,7 +12,8 @@ function updateStatus(message, statusName) {
     statusText.innerHTML = message;
 }
 
-function inputChanged() {
+function inputChanged(e) {
+    // if (e.target.id == 'attachments') return;
     if (readyToSend) {
         readyToSend = false;
         document.getElementById('confirm-send-btn').setAttribute('hidden', '');
@@ -42,6 +43,7 @@ document.getElementById('preview-form').addEventListener('submit', e => {
 
         bodyName = json.data.bodyName;
         recipientsName = json.data.recipientsName;
+        attachments = json.data.attachments;
 
         const parentContainer = document.getElementById('page-right-container');
         const iframe = document.createElement('iframe');
@@ -61,7 +63,7 @@ document.getElementById('confirm-send-btn').addEventListener('click', e => {
     updateStatus('开始发送……');
     document.querySelectorAll('#preview-form button').forEach(el => el.setAttribute('disabled', ''));
     const subject = document.getElementById('subjectInput').value;
-    const data = {subject: subject, bodyName: bodyName, recipientsName: recipientsName};
+    const data = {subject: subject, bodyName: bodyName, recipientsName: recipientsName, attachments: attachments};
 
     // Use SocketIO instead of fetch to communicate
     socket.emit('send', data);

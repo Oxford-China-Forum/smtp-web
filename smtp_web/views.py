@@ -26,22 +26,30 @@ def upload_files():
         return json_resp(code=-1, message='缺失文件')
     body_extension = get_file_extension(body_file.filename)
     recipients_extension = get_file_extension(recipients_file.filename)
-    # current_time = time.strftime('%Y%m%d-%H%M%S')
-    # body_path = os.path.join(app.config['UPLOAD_DIR'], current_time + body_extension)
-    # recipients_path = os.path.join(app.config['UPLOAD_DIR'], current_time + recipients_extension)
     body_filename = str(uuid.uuid1()) + body_extension
     recipients_filename = str(uuid.uuid1()) + recipients_extension
     body_file.save(os.path.join(app.config['UPLOAD_DIR'], body_filename))
     recipients_file.save(os.path.join(app.config['UPLOAD_DIR'], recipients_filename))
 
+    # Process and save attachments
+    attachments = []
+    for attachment in request.files.getlist('attachments') or []:
+        if attachment is None or attachment.filename == '':
+            continue
+        extension = get_file_extension(attachment.filename)
+        filename = str(uuid.uuid1()) + extension
+        attachment.save(os.path.join(app.config['UPLOAD_DIR'], filename))
+        attachments.append({'displayName': attachment.filename, 'saveName': filename})
+
     # File validation
     try:
         get_message_body(os.path.join(app.config['UPLOAD_DIR'], body_filename))
         get_recipients(os.path.join(app.config['UPLOAD_DIR'], recipients_filename))
-    except:
+    except Exception as e:
+        # TODO: log these errors
         return json_resp(code=-2, message='文件格式有误，无法读取')
 
-    return json_resp({'bodyName': body_filename, 'recipientsName': recipients_filename})
+    return json_resp({'bodyName': body_filename, 'recipientsName': recipients_filename, 'attachments': attachments})
 
 
 @app.route('/preview', methods=['GET'])
@@ -63,6 +71,7 @@ def initialize_send(data):
     subject = data.get('subject')
     body_filename = data.get('bodyName')
     recipients_filename = data.get('recipientsName')
+    attachments = data.get('attachments')
 
     error_flag = False
     if subject is None or subject == '':
@@ -79,7 +88,16 @@ def initialize_send(data):
         recipients = get_recipients(os.path.join(app.config['UPLOAD_DIR'], recipients_filename))
 
         credentials = (app.config['EMAIL_ADDR'], app.config['EMAIL_PWD'])
-        batch_send_emails(credentials, subject, recipients, body, room=room, logger=app.logger)
+        batch_send_emails(
+            credentials,
+            subject,
+            recipients,
+            body,
+            attachments=attachments,
+            att_dir=app.config['UPLOAD_DIR'],
+            room=room,
+            logger=app.logger
+        )
         socketio.emit('message', {'message': '发送完成'}, to=room)
 
     socketio.emit('end', to=room)

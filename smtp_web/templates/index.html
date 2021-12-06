@@ -3,11 +3,10 @@
 
 {% block head %}
   {{ super() }}
-  <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css">
-  <!-- <link rel="stylesheet" href="/static/styles/search.css"> -->
+  <!-- <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css"> -->
 {% endblock %}
 {% block scripts %}
-  <!-- <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script> -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js" integrity="sha512-zN6KYOtONNTOGXz0RkWX2EpavN9VdIs+2w+To+fhciFv83YA9maUpi2lzZWrOfKXdFIZZomWufBznkyHi3a8oQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="/static/index.js"></script>
   {{ super() }}
@@ -45,9 +44,18 @@
           <div class="col">
             <p>上传收件人 Excel 列表</p>
             <input type="file" class="form-control" id="recipientsFile" name="recipients">
+            <!-- <div id="recipientsDropzone"></div> -->
           </div>
         </div>
-        <!-- <input type="submit"> -->
+        <div class="row">
+          <div class="col step-number-container">
+            <p class="step-number">4</p>
+          </div>
+          <div class="col">
+            <p>上传附件（没有则留空既可）</p>
+            <input type="file" class="form-control" id="attachments" name="attachments" multiple>
+          </div>
+        </div>
         <div class="row">
           <div class="col">
             <button type="submit" value="查看预览" class="btn btn-lg btn-outline-light" id="submit-btn" style="margin-right: 1em;">查看预览</button>
@@ -61,47 +69,6 @@
     </div>
 
     <div class="d-flex flex-column flex-shrink-0 p-3" id="page-right-container"></div>
-    
-    <!-- <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px;">
-      <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
-        <span class="fs-4">Sidebar</span>
-      </a>
-      <hr>
-      <ul class="nav nav-pills flex-column mb-auto">
-        <li class="nav-item">
-          <a href="#" class="nav-link active" aria-current="page">
-            <svg class="bi me-2" width="16" height="16"><use xlink:href="#home"></use></svg>
-            Home
-          </a>
-        </li>
-        <li>
-          <a href="#" class="nav-link text-white">
-            <svg class="bi me-2" width="16" height="16"><use xlink:href="#speedometer2"></use></svg>
-            Dashboard
-          </a>
-        </li>
-        <li>
-          <a href="#" class="nav-link text-white">
-            <svg class="bi me-2" width="16" height="16"><use xlink:href="#table"></use></svg>
-            Orders
-          </a>
-        </li>
-        <li>
-          <a href="#" class="nav-link text-white">
-            <svg class="bi me-2" width="16" height="16"><use xlink:href="#grid"></use></svg>
-            Products
-          </a>
-        </li>
-        <li>
-          <a href="#" class="nav-link text-white">
-            <svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
-            Customers
-          </a>
-        </li>
-      </ul>
-      <hr>
-    </div> -->
 
   </div>
 {% endblock %}

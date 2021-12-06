@@ -1,7 +1,11 @@
 import re
+import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
+from email.header import Header
+from email.utils import formatdate
 from pathlib import Path
 
 import openpyxl
@@ -28,18 +32,20 @@ def _read_excel_data(filepath):
     for i, cell in enumerate(next(rows)):
         if i in (0, 1):
             continue
-        if cell.value.strip() == '':
+        if cell.value is None or cell.value.strip() == '':
             continue
         extras_keys[i] = cell.value.lower()
 
     for row in rows:
-        if row[0].value.strip() == '': # TODO: add regex address check
+        if row[0].value is None:
+            continue
+        if row[0].value.strip() == '': # TODO: add regex email address check
             continue
     
         recipient = {
             'address': row[0].value,
-            'name': row[1].value,
-            'extras': {key: row[i].value for i, key in extras_keys.items()}
+            'name': row[1].value or '',
+            'extras': {key: row[i].value or '' for i, key in extras_keys.items()}
         }
         recipients.append(recipient)
 
@@ -79,8 +85,8 @@ def generate_preview(template_body, recipients):
     return message_body
 
 
-def batch_send_emails(credentials, subject, recipients, template_body, room=None, logger=None, is_plain_text=False):
-    # 登录邮箱服务器
+def batch_send_emails(credentials, subject, recipients, template_body, attachments=None, att_dir=None, room=None, logger=None, is_plain_text=False):
+    # Authentication
     if logger is None:
         print('[INFO] Authenticating...')
     else:
@@ -93,7 +99,7 @@ def batch_send_emails(credentials, subject, recipients, template_body, room=None
     mailserver.starttls()
     mailserver.login(*credentials)
 
-    # 批量发送邮件
+    # Start batch sending emails
     if logger is None:
         print('[INFO] Start batch sending emails.')
     else:
@@ -106,17 +112,23 @@ def batch_send_emails(credentials, subject, recipients, template_body, room=None
         message['From'] = f'Oxford China Forum <{credentials[0]}>'
         message['To'] = recipient['address']
         message['Subject'] = subject
+        message['Date'] = formatdate(localtime=True)
 
-        # 用收件人信息替换模板占位符
+        # Format the template message body with recipient info
         message_body = format_message(template_body, recipient)
         message.attach(MIMEText(message_body, 'plain' if is_plain_text else 'html', 'utf-8'))
 
-        # TODO: handle attachments
-        # att1 = MIMEText(open('123.pdf', 'rb').read(), 'base64', 'utf-8')
-        # att1['Content-Type'] = 'application/octet-stream'
-        # att1['Content-Disposition'] = 'attachment; filename='123.pdf''
-        # message.attach(att1)
-        ...
+        # Attach email attachments
+        for attachment in attachments or []:
+            filepath = os.path.join(att_dir or '', attachment['saveName'])
+            display_name = attachment['displayName']
+            with open(filepath, 'rb') as f:
+                part = MIMEApplication(f.read())
+                part.add_header('Content-Disposition', 'attachment', filename=Header(display_name, 'utf-8').encode())
+                # The following line, despite being used almost everywhere, fails to work
+                # for certain clients, resulting in attachments being displayed simply as "2"
+                # part.add_header('Content-Disposition', 'attachment', filename=('utf-8', '', display_name))
+                message.attach(part)
 
         try:
             mailserver.sendmail(credentials[0], recipient['address'], message.as_string())
@@ -127,7 +139,7 @@ def batch_send_emails(credentials, subject, recipients, template_body, room=None
                 logger.info(message)
             if room is not None:
                 socketio.emit('message', {'message': message, 'type': 'success'}, to=room)
-        except smtplib.SMTPException:
+        except Exception:
             message = f'({i+1}/{total_length}) 发送失败 {recipient["address"]}'
             if logger is None:
                 print(f'[WARNING] {message}')

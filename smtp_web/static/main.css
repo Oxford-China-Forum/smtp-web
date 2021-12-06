@@ -18,7 +18,7 @@ html, body{
 }
 
 #preview-form {
-    margin-top: 150px;
+    margin-top: calc(50vh - 400px);
 }
 
 .step-number-container {

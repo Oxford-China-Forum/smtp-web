@@ -35,7 +35,7 @@ class ProductionConfig(Config):
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SCHEDULER_API_ENABLED = False
-    ALLOWED_ORIGINS = ['http://smtp.oxchina.org', 'https://smtp.oxchina.org', 'http://smtp.oxchina.net', 'https://smtp.oxchina.net']
+    ALLOWED_ORIGINS = ['http://smtp.oxchina.org', 'https://smtp.oxchina.org']
 
 
 app_config = {

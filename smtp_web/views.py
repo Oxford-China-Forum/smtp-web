@@ -93,6 +93,7 @@ def initialize_send(data):
             subject,
             recipients,
             body,
+            reply_to=app.config['REPLY_TO_EMAIL']
             attachments=attachments,
             att_dir=app.config['UPLOAD_DIR'],
             room=room,

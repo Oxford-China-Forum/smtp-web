@@ -5,7 +5,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
 from email.header import Header
-from email.utils import formatdate
+from email.utils import formatdate, formataddr
 from pathlib import Path
 
 import openpyxl
@@ -85,7 +85,7 @@ def generate_preview(template_body, recipients):
     return message_body
 
 
-def batch_send_emails(credentials, subject, recipients, template_body, attachments=None, att_dir=None, room=None, logger=None, is_plain_text=False):
+def batch_send_emails(credentials, subject, recipients, template_body, reply_to=None, attachments=None, att_dir=None, room=None, logger=None, is_plain_text=False):
     # Authentication
     if logger is None:
         print('[INFO] Authenticating...')
@@ -109,7 +109,12 @@ def batch_send_emails(credentials, subject, recipients, template_body, attachmen
     total_length = len(recipients)
     for i, recipient in enumerate(recipients):
         message = MIMEMultipart()
-        message['From'] = f'Oxford China Forum <{credentials[0]}>'
+        message['From'] = formataddr(('Oxford China Forum', credentials[0]))
+        if reply_to is not None:
+            if isinstance(reply_to, str):
+                message['Reply-To'] = reply_to
+            else:
+                message['Reply-To'] = formataddr(reply_to[:2])
         message['To'] = recipient['address']
         message['Subject'] = subject
         message['Date'] = formatdate(localtime=True)
